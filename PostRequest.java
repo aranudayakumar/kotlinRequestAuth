@@ -21,7 +21,7 @@ public class PostRequest {
             conUser.setRequestProperty("Accept", "application/json");
             conUser.setDoOutput(true);
 
-            String jsonUserInputString = "{\"username\": \"$userName\", \"password\": \"$password\"}";
+            String jsonUserInputString = String.format("{\"username\": \"%s\", \"password\": \"%s\"}", userName, password);
 
             try (DataOutputStream out = new DataOutputStream(conUser.getOutputStream())) {
                 out.writeBytes(jsonUserInputString);
@@ -61,41 +61,10 @@ public class PostRequest {
     public static void main(String[] args) {
         try {
             // Step 1: Create a new user by sending a POST request to the /users/ endpoint
-            URL userUrl = new URL("http://127.0.0.1:8000/users/register");
-            HttpURLConnection conUser = (HttpURLConnection) userUrl.openConnection();
-
-            conUser.setRequestMethod("POST");
-            conUser.setRequestProperty("Content-Type", "application/json; utf-8");
-            conUser.setRequestProperty("Accept", "application/json");
-            conUser.setDoOutput(true);
-
-            String jsonUserInputString = "{\"username\": \"new_us399wddwer\", \"password\": \"new_password123\"}";
-
-            try (DataOutputStream out = new DataOutputStream(conUser.getOutputStream())) {
-                out.writeBytes(jsonUserInputString);
-                out.flush();
-            }
-
-            int userStatus = conUser.getResponseCode();
-            System.out.println("User Creation Response Code: " + userStatus);
-
-            BufferedReader inUser;
-            if (userStatus >= 200 && userStatus < 300) {
-                inUser = new BufferedReader(new InputStreamReader(conUser.getInputStream(), StandardCharsets.UTF_8));
-            } else {
-                inUser = new BufferedReader(new InputStreamReader(conUser.getErrorStream(), StandardCharsets.UTF_8));
-            }
+            boolean result = userRegister("kalai34","hello123");
+            System.out.printf("username creation %s\n", result);
 
             String inputLine;
-            StringBuilder userContent = new StringBuilder();
-            while ((inputLine = inUser.readLine()) != null) {
-                userContent.append(inputLine);
-            }
-
-            inUser.close();
-            conUser.disconnect();
-
-            System.out.println("User Creation Response: " + userContent.toString());
 
             // Step 2: Obtain a token by sending a POST request to the /api/token endpoint
             URL tokenUrl = new URL("http://127.0.0.1:8000/api/token");
@@ -170,7 +139,6 @@ public class PostRequest {
             e.printStackTrace();
         }
 
-        System.out.println(userRegister("viha7s","hello123"));
     }
 
 
