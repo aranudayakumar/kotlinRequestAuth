@@ -6,10 +6,62 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
 public class PostRequest {
+
+
+    private static boolean userRegister(String userName, String password) {
+
+        boolean userCreationSuccess = false;
+        try {
+            // Step 1: Create a new user by sending a POST request to the /users/ endpoint
+            URL userUrl = new URL("http://127.0.0.1:8000/users/register");
+            HttpURLConnection conUser = (HttpURLConnection) userUrl.openConnection();
+
+            conUser.setRequestMethod("POST");
+            conUser.setRequestProperty("Content-Type", "application/json; utf-8");
+            conUser.setRequestProperty("Accept", "application/json");
+            conUser.setDoOutput(true);
+
+            String jsonUserInputString = "{\"username\": \"$userName\", \"password\": \"$password\"}";
+
+            try (DataOutputStream out = new DataOutputStream(conUser.getOutputStream())) {
+                out.writeBytes(jsonUserInputString);
+                out.flush();
+            }
+
+            int userStatus = conUser.getResponseCode();
+            System.out.println("User Creation Response Code: " + userStatus);
+
+            BufferedReader inUser;
+            if (userStatus >= 200 && userStatus < 300) {
+                inUser = new BufferedReader(new InputStreamReader(conUser.getInputStream(), StandardCharsets.UTF_8));
+                userCreationSuccess = true;
+            } else {
+                inUser = new BufferedReader(new InputStreamReader(conUser.getErrorStream(), StandardCharsets.UTF_8));
+            }
+
+            String inputLine;
+            StringBuilder userContent = new StringBuilder();
+            while ((inputLine = inUser.readLine()) != null) {
+                userContent.append(inputLine);
+            }
+
+            inUser.close();
+            conUser.disconnect();
+
+            System.out.println("User Creation Response: " + userContent.toString());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return userCreationSuccess;
+    }   
+
+    
+
     public static void main(String[] args) {
         try {
             // Step 1: Create a new user by sending a POST request to the /users/ endpoint
-            URL userUrl = new URL("http://127.0.0.1:8000/users/");
+            URL userUrl = new URL("http://127.0.0.1:8000/users/register");
             HttpURLConnection conUser = (HttpURLConnection) userUrl.openConnection();
 
             conUser.setRequestMethod("POST");
@@ -113,10 +165,16 @@ public class PostRequest {
 
             System.out.println("Items Endpoint Response: " + itemsContent.toString());
 
+
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        System.out.println(userRegister("viha7s","hello123"));
     }
+
+
+
 
     private static String extractTokenFromResponse(String response) {
         // Assuming the token is in the response like {"access_token":"<TOKEN>","token_type":"bearer"}
